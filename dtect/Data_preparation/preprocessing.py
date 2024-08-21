@@ -4,57 +4,48 @@ import os
 from skimage.transform import resize
 import numpy as np
 
-def open_files():
+def open_files(folder_name):
     """
     Open all transformed images as PIL images
     return => a list of PIL images
     """
     images=[]
-    filenames=[]
-    for filename in os.listdir('Data/processed_data/three_band_transformed'):
-            file_path = os.path.join('Data/processed_data/three_band_transformed', filename)
-            if file_path!= "Data/processed_data/three_band_transformed/.DS_Store" and file_path!= "Data/processed_data/three_band_transformed/.gitkeep":
+
+    if folder_name == 'three_band_geo_proc':
+        for category in os.listdir(f'Data/processed_data/{folder_name}'):
+            for filename in category:
+                file_path = os.path.join(f'Data/processed_data/{folder_name}/{category}', filename)
                 img = Image.open(file_path)
                 images.append(img)
-                filenames.append(filename)
-    return images, filenames
 
-def cropping(X):
+    else:
+        for filename in os.listdir(f'Data/processed_data/{folder_name}'):
+                file_path = os.path.join(f'Data/processed_data/{folder_name}', filename)
+                if file_path!= f"Data/processed_data/{folder_name}/.DS_Store" and file_path!= f"Data/processed_data/{folder_name}/.gitkeep":
+                    img = Image.open(file_path)
+                    images.append(img)
+
+    return images
+
+def cropping(X,format_crop_h, format_crop_w):
     """
     Crops image to desired shape of (0, 0, 3335, 3335)
     input => PIL image
     return => cropped PIL image
     """
-    format_crop = (0, 0, 3335, 3335) # cropping rule basé sur les dimensions les plus réduites du dataset
+    format_crop = (0, 0, format_crop_h, format_crop_w) # cropping rule basé sur les dimensions les plus réduites du dataset
     return X.crop(format_crop)
 
-def resized(X):
-    return resize(np.array(X), (544, 544, 3))
 
-def cropped_resized_images():
+def cropped_resized_images(folder_name,format_crop_h,format_crop_w,resize_params):
     """
     crops and resizes all images and put them in a list
     return => a list of plt arrays
     """
-    images, filenames =open_files()
+    images=open_files(folder_name)
 
     processed_image=[]
     for image in images:
-        processed_image.append(resized(cropping(image)))
+        processed_image.append(resize(np.array(cropping(X=image, format_crop_h=format_crop_h, format_crop_w=format_crop_w)),resize_params=resize_params))
 
-    return processed_image ,filenames
-
-
-def save_images():
-    """
-    saves all images in three_band_proc
-    """
-    processed_image, filenames = cropped_resized_images()
-    i=0
-    for image in processed_image:
-        file_path=f'../Data/processed_data/three_band_proc/{filenames[i]}'
-        plt.imsave(file_path,image)
-        i+=1
-
-if __name__=="__main__":
-    save_images()
+    return processed_image
