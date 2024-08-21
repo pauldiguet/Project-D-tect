@@ -11,3 +11,5 @@ tensorflow
 torch
 geopandas
 shapely
+scikit-image
+pillow
