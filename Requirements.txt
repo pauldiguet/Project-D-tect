@@ -9,5 +9,5 @@ opencv-python
 tifffile
 tensorflow
 torch
-geaopandas
+geopandas
 shapely
