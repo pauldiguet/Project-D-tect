@@ -26,6 +26,7 @@ def build_encoder(input_shape):
     return encoder
 
 
+
 def build_decoder():
 
     decoder = Sequential()
