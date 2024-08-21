@@ -27,17 +27,17 @@ def open_files(folder_name):
 
     return images
 
-def cropping(X,format_crop_h, format_crop_w):
+def cropping(X,format_crop):
     """
     Crops image to desired shape of (0, 0, 3335, 3335)
     input => PIL image
     return => cropped PIL image
     """
-    format_crop = (0, 0, format_crop_h, format_crop_w) # cropping rule basé sur les dimensions les plus réduites du dataset
-    return X.crop(format_crop)
+    format_cropped = (0, 0, format_crop, format_crop) # cropping rule basé sur les dimensions les plus réduites du dataset
+    return X.crop(format_cropped)
 
 
-def cropped_resized_images(folder_name,format_crop_h,format_crop_w,resize_params):
+def cropped_resized_images(folder_name,format_crop,resize_params):
     """
     crops and resizes all images and put them in a list
     return => a list of plt arrays
@@ -46,6 +46,6 @@ def cropped_resized_images(folder_name,format_crop_h,format_crop_w,resize_params
 
     processed_image=[]
     for image in images:
-        processed_image.append(resize(np.array(cropping(X=image, format_crop_h=format_crop_h, format_crop_w=format_crop_w)),resize_params=resize_params))
+        processed_image.append(resize(np.array(cropping(image, format_crop)),(resize_params,resize_params,3)))
 
     return processed_image
