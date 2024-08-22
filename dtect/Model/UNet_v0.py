@@ -35,11 +35,11 @@ class UNet(nn.Module):
         self.flat = nn.Flatten()
         self.sigm = nn.Sigmoid()
 
-    def conv_block(self, in_channels, out_channels, kernel_size, padding):
+    def conv_block(self, in_channels, out_channels, kernel_size, padding=None):
         return nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, padding=None),
+            nn.Conv2d(in_channels, out_channels, kernel_size, padding),
             nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=kernel_size, padding=None),
+            nn.Conv2d(out_channels, out_channels, kernel_size, padding),
             nn.ReLU(inplace=True)
         )
 
@@ -78,3 +78,7 @@ class UNet(nn.Module):
         pred = self.sigm(flat)
 
         return pred
+
+
+# if __name__ == '__main__':
+#     main()
