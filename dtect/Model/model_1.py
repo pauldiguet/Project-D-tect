@@ -73,7 +73,8 @@ def train_autoencoder(df, input_shape= (544,544,3)):
     autoencoder = build_autoencoder(encoder, decoder, input_shape)
 
     compile_autoencoder(autoencoder)
-    history = autoencoder.fit(df['image_x'], df['image_y'], epochs=1, batch_size=0)
+    print(np.array(df['image_x']).type)
+    history = autoencoder.fit(np.array(df['image_x']), df['image_y'], epochs=1, batch_size=0)
     return history
 
 
