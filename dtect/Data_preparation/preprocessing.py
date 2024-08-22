@@ -1,4 +1,3 @@
-# %load /Users/kiradavidoff/code/pauldiguet/Project-D-tect/dtect/Data_preparation/preprocessing.py
 import matplotlib.pyplot as plt
 from PIL import Image
 import os
