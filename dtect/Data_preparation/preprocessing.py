@@ -58,15 +58,19 @@ def cropping(X,format_crop):
 def cropped_resized_images(folder_name,format_crop,resize_params,train=False):
     """
     crops and resizes all images and put them in a list
-    return => a list of plt arrays
+    return => a df of plt arrays and image name
     """
     images, filenames =open_files(folder_name=folder_name,train=train)
 
-    processed_image={}
+    images_cropped=[]
+    processed_image=pd.DataFrame(columns=["image_name",'image'])
+    processed_image["image_name"]= [file.split('.')[0] for file in filenames]
+
     i=0
     for image in images:
-        processed_image[filenames[i].split('.')[0]]=resize(np.array(cropping(image, format_crop)),(resize_params,resize_params,3))
+        images_cropped.append(resize(np.array(cropping(image, format_crop)),(resize_params,resize_params,3)))
         i+=1
+    processed_image['image']=images_cropped
 
     return processed_image
 
