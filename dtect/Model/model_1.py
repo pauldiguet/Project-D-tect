@@ -3,9 +3,9 @@ from keras import Sequential, layers, models
 from keras.layers import Conv2D, MaxPooling2D, Conv2DTranspose, UpSampling2D, Input
 from keras.models import Model
 import numpy as np
-from dtect.Data_preparation.preprocessing import
+from dtect.Data_preparation.preprocessing import cropped_resized_images
 
-input_shape = (544,544,3)
+
 
 def build_encoder(input_shape= (544,544,3)):
 
@@ -66,15 +66,17 @@ def compile_autoencoder(autoencoder):
                     metrics=['accuracy'])
 
 
-def train_autoencoder(X_train, y_train, input_shape= (544,544,3)):
+def train_autoencoder(df, input_shape= (544,544,3)):
+
     encoder = build_encoder(input_shape)
     decoder = build_decoder()
     autoencoder = build_autoencoder(encoder, decoder, input_shape)
 
     compile_autoencoder(autoencoder)
-    history = autoencoder.fit(X_train, y_train, epochs=30, batch_size=15)
+    print(np.array(df['image_x']).type)
+    history = autoencoder.fit(np.array(df['image_x']), df['image_y'], epochs=1, batch_size=0)
     return history
 
 
 if __name__ == '__main__':
-    train_autoencoder(X_train, y_train, input_shape= (544,544,3))
+    train_autoencoder(df=cropped_resized_images(train=True, category=1), input_shape= (544,544,3))
