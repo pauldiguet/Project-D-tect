@@ -7,3 +7,6 @@
 *.geojson
 **__MACOSX/
 **.DS_Store
+dtect/Data_preparation/__pycache__/
+Data/raw_data/train_geojson_v3/.DS_Store
+*.DS_Store
