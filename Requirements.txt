@@ -8,7 +8,7 @@ imageio==2.35.1
 opencv-python==4.10.0.84
 tifffile==2024.8.10
 tensorflow==2.10.0
-torch==2.4.0
+torch==2.2.2
 torchsummary==1.5.1
 geopandas==1.0.1
 shapely==2.0.6
