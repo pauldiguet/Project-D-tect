@@ -87,4 +87,4 @@ def transform_geojson():
                     geojson = []
 
 if __name__=="__main__":
-    transform_json()
+    transform_geojson()

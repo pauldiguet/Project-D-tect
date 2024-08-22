@@ -5,45 +5,51 @@ from skimage.transform import resize
 import numpy as np
 import pandas as pd
 
-def open_files(folder_name, train=False):
+def open_files(category=1,train=False):
     """
     Open all transformed images as PIL images
     return => a list of PIL images
     """
-    images=[]
+    images_cat=[]
+    filenames_cat=[]
     filenames=[]
+    images=[]
+    trainwkd=pd.read_csv('../Data/raw_data/train_wkt_v4.csv')
+    names=trainwkd['ImageId'].drop_duplicates()
 
-    train_wkt=pd.read_csv('Data/raw_data/train_wkt_v4.csv')
 
 
     if train==True:
-        for filename in os.listdir(f'Data/processed_data/{folder_name}'):
-                file_path = os.path.join(f'Data/processed_data/{folder_name}', filename)
-                if filename.split('.')[0] in train_wkt['ImageId'].drop_duplicates():
+        for filename in os.listdir(f'/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_geo_proc/Class_{category}'):
+            file_path = os.path.join(f'/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_geo_proc/Class_{category}', filename)
+            if file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
+                img = Image.open(file_path)
+                images_cat.append(img)
+                filenames_cat.append(filename.split('.')[0][:-6])
+
+
+
+        for filename in os.listdir(f'/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc'):
+                file_path = os.path.join(f'/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc', filename)
+                if filename.split('.')[0] in filenames_cat:
                     img = Image.open(file_path)
                     images.append(img)
-                    filenames.append(filename)
-
-
-    if folder_name == 'three_band_geo_proc':
-        for category in os.listdir(f'Data/processed_data/{folder_name}'):
-            for filename in category:
-                file_path = os.path.join(f'Data/processed_data/{folder_name}/{category}', filename)
-                img = Image.open(file_path)
-                images.append(img)
-                filenames.append(filename)
+                    filenames.append(filename.split('.')[0])
 
 
     else:
-        for filename in os.listdir(f'Data/processed_data/{folder_name}'):
-                file_path = os.path.join(f'Data/processed_data/{folder_name}', filename)
-                if file_path!= f"Data/processed_data/{folder_name}/.DS_Store" and file_path!= f"Data/processed_data/{folder_name}/.gitkeep":
-                    img = Image.open(file_path)
-                    images.append(img)
-                    filenames.append(filename)
+        for filename in os.listdir(f'/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc'):
+                file_path = os.path.join(f'/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc', filename)
+                if filename.split('.')[0] not in names:
+
+                    if file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc/.gitkeep":
+
+                        img = Image.open(file_path)
+                        images.append(img)
+                        filenames.append(filename)
 
 
-    return images, filenames
+    return images_cat, filenames_cat,images, filenames
 
 def cropping(X,format_crop):
     """
@@ -54,26 +60,40 @@ def cropping(X,format_crop):
     format_cropped = (0, 0, format_crop, format_crop) # cropping rule basé sur les dimensions les plus réduites du dataset
     return X.crop(format_cropped)
 
+def binary(image):
+    image[image == 255] = 1
+    BinaryNP = image[:,:,1]
+    BinaryNP = np.expand_dims(BinaryNP, axis=2)
 
-def cropped_resized_images(folder_name,format_crop,resize_params,train=False):
+
+    return BinaryNP
+
+def cropped_resized_images(format_crop=3335,resize_params=544,train=False,category=1):
     """
     crops and resizes all images and put them in a list
     return => a df of plt arrays and image name
     """
-    images, filenames =open_files(folder_name=folder_name,train=train)
-
-    images_cropped=[]
-    processed_image=pd.DataFrame(columns=["image_name",'image'])
-    processed_image["image_name"]= [file.split('.')[0] for file in filenames]
-
-    i=0
-    for image in images:
-        images_cropped.append(resize(np.array(cropping(image, format_crop)),(resize_params,resize_params,3)))
-        i+=1
-    processed_image['image']=images_cropped
-
-    return processed_image
+    image_cat, filenames_cat, images, filenames =open_files(train=train, category=category)
 
 
-if __name__ == '__main__':
-    cropped_resized_images(folder_name='three_band_preproc',format_crop=3335,resize_params=544,train=True)
+
+    if len(image_cat) == 0:
+        processed_image=pd.DataFrame(columns=["image_name",'image'])
+        processed_image['image']=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
+        processed_image["image_name"]= [file for file in filenames]
+
+    else:
+        processed_image=pd.DataFrame(columns=["image_name",'image'])
+        processed_image_Y=pd.DataFrame(columns=["image_name",'image'])
+
+        processed_image['image']=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
+        processed_image["image_name"]= [file for file in filenames]
+
+
+
+        processed_image_Y['image']=[binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat]
+        processed_image_Y["image_name"]= [file.split('.')[0] for file in filenames_cat]
+
+        merged_df=pd.merge(processed_image, processed_image_Y, how='left', on='image_name')
+        merged_df.drop(labels='image_name', axis=1)
+    return merged_df
