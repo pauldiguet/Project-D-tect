@@ -66,17 +66,17 @@ def compile_autoencoder(autoencoder):
                     metrics=['accuracy'])
 
 
-def train_autoencoder(df, input_shape= (544,544,3)):
+def train_autoencoder(X,Y, input_shape= (544,544,3)):
 
     encoder = build_encoder(input_shape)
     decoder = build_decoder()
     autoencoder = build_autoencoder(encoder, decoder, input_shape)
 
     compile_autoencoder(autoencoder)
-    print(np.array(df['image_x']).type)
-    history = autoencoder.fit(np.array(df['image_x']), df['image_y'], epochs=1, batch_size=0)
+    print(np.array(X.dtype))
+    history = autoencoder.fit(np.array(X, Y, epochs=5, batch_size=15))
     return history
 
 
 if __name__ == '__main__':
-    train_autoencoder(df=cropped_resized_images(train=True, category=1), input_shape= (544,544,3))
+    train_autoencoder(X=cropped_resized_images(category=2, train=True)[0],Y=cropped_resized_images(category=1, train=True)[1], input_shape= (544,544,3))
