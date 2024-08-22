@@ -11,3 +11,4 @@
 *.json
 .envrc
 *.vscode
+__pycache__
