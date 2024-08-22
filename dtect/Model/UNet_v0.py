@@ -88,8 +88,8 @@ if __name__ == '__main__':
     criterion = nn.BCELoss()
 
     # Exemple avec 1 image
-    x = torch.randn(1, 3, 544, 544)
-    y = torch.randint(0, 1, (1, 1, 544, 544)).float()
+    x = torch.randn(25, 3, 128, 128)
+    y = torch.randint(0, 1, (25, 1, 128, 128)).float()
 
     # Forward pass
     output = model(x)
