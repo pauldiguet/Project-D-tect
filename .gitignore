@@ -7,7 +7,16 @@
 *.geojson
 **__MACOSX/
 **.DS_Store
+<<<<<<< HEAD
+dtect/Data_preparation/__pycache__/
+Data/raw_data/train_geojson_v3/.DS_Store
+*.DS_Store
+=======
 .env
 *.json
 .envrc
+<<<<<<< HEAD
 *.vscode
+=======
+>>>>>>> 461866e53551ffc1504e003bd24570bedb3af8bf
+>>>>>>> 8a24ae3a97ff113ee3d935b7ff9b3ff63d742ed3
