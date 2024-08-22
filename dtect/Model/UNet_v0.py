@@ -2,13 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import pandas as pd
 
 class UNet(nn.Module):
     def __init__(self):
         super(UNet, self).__init__()
 
         # Partie descendante (Encoder)
-        self.enc1 = self.conv_block(3, 64, kernel_size=5, padding='same')
+        self.enc1 = self.conv_block(3, 64, kernel_size=3, padding='same')
         self.enc2 = self.conv_block(64, 128, kernel_size=3, padding='same')
         self.enc3 = self.conv_block(128, 256, kernel_size=3, padding='same')
         self.enc4 = self.conv_block(256, 512, kernel_size=3, padding='same')
@@ -46,32 +47,41 @@ class UNet(nn.Module):
     def forward(self, x):
         # Encoder
         enc1 = self.enc1(x)
+        shapes.append(enc1.shape)
         enc2 = self.enc2(F.max_pool2d(enc1, 2))
+        shapes.append(enc2.shape)
         enc3 = self.enc3(F.max_pool2d(enc2, 2))
+        shapes.append(enc3.shape)
         enc4 = self.enc4(F.max_pool2d(enc3, 2))
+        shapes.append(enc4.shape)
 
         bottleneck = self.bottleneck(F.max_pool2d(enc4, 2))
+        shapes.append(bottleneck.shape)
 
         # Decoder with skip connections
         dec4 = self.upsamp4(bottleneck)
         dec4 = self.downconv4(dec4)
         dec4 = torch.cat((dec4, enc4), dim=1)
         dec4 = self.dec4(dec4)
+        shapes.append(dec4.shape)
 
         dec3 = self.upsamp3(dec4)
         dec3 = self.downconv3(dec3)
         dec3 = torch.cat((dec3, enc3), dim=1)
         dec3 = self.dec3(dec3)
+        shapes.append(dec3.shape)
 
         dec2 = self.upsamp2(dec3)
         dec2 = self.downconv2(dec2)
         dec2 = torch.cat((dec2, enc2), dim=1)
         dec2 = self.dec2(dec2)
+        shapes.append(dec2.shape)
 
         dec1 = self.upsamp1(dec2)
         dec1 = self.downconv1(dec1)
         dec1 = torch.cat((dec1, enc1), dim=1)
         dec1 = self.dec1(dec1)
+        shapes.append(dec1.shape)
 
         out = self.conv_out(dec1)
         pred = self.sigm(out)
@@ -81,6 +91,7 @@ class UNet(nn.Module):
 
 if __name__ == '__main__':
     # Initialiser le modèle
+    shapes = []
     model = UNet()
 
     # optimizer & loss function (Adam & Binary-cross entropy)
@@ -103,3 +114,4 @@ if __name__ == '__main__':
     optimizer.step()
 
     print(f'Loss: {loss.item()}')
+    print(pd.DataFrame(shapes))
