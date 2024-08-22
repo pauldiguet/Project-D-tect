@@ -9,6 +9,7 @@ opencv-python
 tifffile
 tensorflow
 torch
+torchsummary
 geopandas
 shapely
 scikit-image
