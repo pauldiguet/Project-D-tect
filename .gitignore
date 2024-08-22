@@ -7,3 +7,6 @@
 *.geojson
 **__MACOSX/
 **.DS_Store
+.env
+*.json
+.envrc
