@@ -10,3 +10,4 @@
 .env
 *.json
 .envrc
+*.vscode
