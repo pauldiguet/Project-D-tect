@@ -14,15 +14,15 @@ def open_files(category=1,train=False):
     filenames_cat=[]
     filenames=[]
     images=[]
-    trainwkd=pd.read_csv('../Data/raw_data/train_wkt_v4.csv')
+    trainwkd=pd.read_csv('Data/raw_data/train_wkt_v4.csv')
     names=trainwkd['ImageId'].drop_duplicates()
 
 
 
     if train==True:
         for filename in os.listdir(f'Data/processed_data/three_band_geo_proc/Class_{category}'):
-            file_path = os.path.join(f'/Data/processed_data/three_band_geo_proc/Class_{category}', filename)
-            if file_path!= f"/Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"/Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
+            file_path = os.path.join(f'Data/processed_data/three_band_geo_proc/Class_{category}', filename)
+            if file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"/Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
                 img = Image.open(file_path)
                 images_cat.append(img)
                 filenames_cat.append(filename.split('.')[0][:-6])
@@ -32,8 +32,8 @@ def open_files(category=1,train=False):
         cats=filenames_cat.copy()
 
         while len(cats)>0:
-            for filename in os.listdir(f'/Data/processed_data/three_band_preproc'):
-                    file_path = os.path.join(f'/Data/processed_data/three_band_preproc', filename)
+            for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
+                    file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
                     if len(cats)==0:
                         break
                     if filename.split('.')[0] == cats[0]:
@@ -46,11 +46,11 @@ def open_files(category=1,train=False):
 
 
     else:
-        for filename in os.listdir(f'/Data/processed_data/three_band_preproc'):
-                file_path = os.path.join(f'/Data/processed_data/three_band_preproc', filename)
+        for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
+                file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
                 if filename.split('.')[0] not in names:
 
-                    if file_path!= f"/Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc/.gitkeep":
+                    if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc/.gitkeep":
 
                         img = Image.open(file_path)
                         images.append(img)
@@ -90,6 +90,6 @@ def cropped_resized_images(format_crop=3335,resize_params=544,train=False,catego
 
 
     else:
-        processed_image_X=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
-        processed_image_Y=[binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat]
+        processed_image_X=np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])
+        processed_image_Y=np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])
     return processed_image_X, processed_image_Y
