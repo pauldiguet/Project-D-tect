@@ -17,13 +17,13 @@ def open_files(category=1,train=False):
     images=[]
     trainwkd=pd.read_csv('Data/raw_data/train_wkt_v4.csv')
     names=trainwkd['ImageId'].drop_duplicates()
-
+    
     if os.environ.get("FILE_TARGET") == "gcs":
         client = storage.Client()
         bucket_transfo = client.bucket(os.environ.get("BUCKET_TRANSFO"))
         Images = bucket_transfo.blob(f"three_band_preproc")
         geojsons = bucket_transfo.blob(f"three_band_geo_proc/Class_{category}")
-
+        
         if train==True:
             for filename in os.listdir(geojsons):
                 file_path = os.path.join(geojsons, filename)
@@ -43,7 +43,7 @@ def open_files(category=1,train=False):
                             img = Image.open(file_path)
                             images.append(img)
                             filenames.append(filename.split('.')[0])
-
+                            
     else:
         if train==True:
             for filename in os.listdir(f'Data/processed_data/three_band_geo_proc/Class_{category}'):
@@ -54,7 +54,7 @@ def open_files(category=1,train=False):
                     filenames_cat.append(filename.split('.')[0][:-6])
             u=0
             cats=filenames_cat.copy()
-
+            
             while len(cats)>0:
                 for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
                         file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
@@ -66,23 +66,18 @@ def open_files(category=1,train=False):
                             images.append(img)
                             filenames.append(filename.split('.')[0])
 
-
+                            
         else:
             for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
                     file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
                     if filename.split('.')[0] not in names:
-
                         if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc/.gitkeep":
-
                             img = Image.open(file_path)
                             images.append(img)
                             filenames.append(filename)
 
 
     return images_cat,images
-
-
-
 
 def cropping(X,format_crop):
     """
@@ -93,13 +88,22 @@ def cropping(X,format_crop):
     format_cropped = (0, 0, format_crop, format_crop) # cropping rule basé sur les dimensions les plus réduites du dataset
     return X.crop(format_cropped)
 
-def binary(image):
-    image[image == 255] = 1
-    BinaryNP = image[:,:,1]
-    BinaryNP = np.expand_dims(BinaryNP, axis=2)
+def binary(rgb_array):
+    """
+    Converts an RGB image array to a binary image array without converting to binary.
 
+    - numpy.ndarray: A binary image array with shape (height, width) and values 0 or 1.
+    """
 
-    return BinaryNP
+    r_channel = rgb_array[:,:, 0] > 0.9
+    g_channel = rgb_array[:,:, 1] > 0.9
+    b_channel = rgb_array[:,:,2] > 0.9
+
+    binary_array = np.where(r_channel | g_channel | b_channel, 1, 0)
+
+    final_array=np.expand_dims(binary_array, -1)
+
+    return final_array
 
 def cropped_resized_images(format_crop=3335,resize_params=544,train=False,category=1):
     """

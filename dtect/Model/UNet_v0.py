@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import pandas as pd
+import numpy as np
+from dtect.Data_preparation.preprocessing import cropped_resized_images
 
 class UNet(nn.Module):
     def __init__(self):
@@ -99,9 +101,8 @@ if __name__ == '__main__':
     criterion = nn.BCELoss()
 
     # Exemple avec 1 image
-    x = torch.randn(25, 3, 128, 128)
-    y = torch.randint(0, 1, (25, 1, 128, 128)).float()
-
+    x = torch.from_numpy(cropped_resized_images(train=True, category=2, resize_params=128)[0].reshape(15, 3, 128, 128).astype(np.float32))
+    y = torch.from_numpy(cropped_resized_images(train=True, category=2, resize_params=128)[1].reshape(15, 1, 128, 128).astype(np.float32)).float()
     # Forward pass
     output = model(x)
 
