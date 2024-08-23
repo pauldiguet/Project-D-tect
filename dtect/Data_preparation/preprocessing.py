@@ -17,13 +17,13 @@ def open_files(category=1,train=False):
     images=[]
     trainwkd=pd.read_csv('Data/raw_data/train_wkt_v4.csv')
     names=trainwkd['ImageId'].drop_duplicates()
-    
+
     if os.environ.get("FILE_TARGET") == "gcs":
         client = storage.Client()
         bucket_transfo = client.bucket(os.environ.get("BUCKET_TRANSFO"))
         Images = bucket_transfo.blob(f"three_band_preproc")
         geojsons = bucket_transfo.blob(f"three_band_geo_proc/Class_{category}")
-        
+
         if train==True:
             for filename in os.listdir(geojsons):
                 file_path = os.path.join(geojsons, filename)
@@ -43,18 +43,18 @@ def open_files(category=1,train=False):
                             img = Image.open(file_path)
                             images.append(img)
                             filenames.append(filename.split('.')[0])
-                            
+
     else:
         if train==True:
             for filename in os.listdir(f'Data/processed_data/three_band_geo_proc/Class_{category}'):
                 file_path = os.path.join(f'Data/processed_data/three_band_geo_proc/Class_{category}', filename)
-                if file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"/Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
+                if file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
                     img = Image.open(file_path)
                     images_cat.append(img)
                     filenames_cat.append(filename.split('.')[0][:-6])
             u=0
             cats=filenames_cat.copy()
-            
+
             while len(cats)>0:
                 for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
                         file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
@@ -66,12 +66,12 @@ def open_files(category=1,train=False):
                             images.append(img)
                             filenames.append(filename.split('.')[0])
 
-                            
+
         else:
             for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
                     file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
                     if filename.split('.')[0] not in names:
-                        if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc/.gitkeep":
+                        if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"Data/processed_data/three_band_preproc/.gitkeep":
                             img = Image.open(file_path)
                             images.append(img)
                             filenames.append(filename)
