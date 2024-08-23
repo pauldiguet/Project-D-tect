@@ -81,7 +81,9 @@ def binary(rgb_array):
 
     binary_array = np.where(r_channel | g_channel | b_channel, 1, 0)
 
-    return binary_array
+    final_array=np.expand_dims(binary_array, -1)
+
+    return final_array
 
 def cropped_resized_images(format_crop=3335,resize_params=544,train=False,category=1):
     """
