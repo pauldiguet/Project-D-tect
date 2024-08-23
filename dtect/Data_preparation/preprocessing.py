@@ -105,16 +105,17 @@ def binary(rgb_array):
 
     return final_array
 
-def cropped_resized_images(format_crop=3335,resize_params=544,train=False,category=1):
+def cropped_resized_images(format_crop=3335,resize_params=512,train=True,category=1):
     """
     crops and resizes all images and put them in a list
     return => a df of plt arrays and image name
     """
-    image_cat,  images  =open_files(train=train, category=category)
+    image_cat, images=open_files(train=train, category=category)
+    processed_image_X = None  # Initialisation
+    processed_image_Y = None  # Initialisation
 
     if len(image_cat) == 0:
         processed_image=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
-
     else:
         processed_image_X=np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])
         processed_image_Y=np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])
