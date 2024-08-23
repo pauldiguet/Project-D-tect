@@ -68,13 +68,21 @@ def cropping(X,format_crop):
     format_cropped = (0, 0, format_crop, format_crop) # cropping rule basé sur les dimensions les plus réduites du dataset
     return X.crop(format_cropped)
 
-def binary(image):
-    image[image == 255] = 1
-    BinaryNP = image[:,:,1]
-    BinaryNP = np.expand_dims(BinaryNP, axis=2)
+def binary(rgb_array):
+    """
+    Converts an RGB image array to a binary image array without converting to binary.
 
+    - numpy.ndarray: A binary image array with shape (height, width) and values 0 or 1.
+    """
 
-    return BinaryNP
+    r_channel = rgb_array[:,:, 0] > 0.9
+    g_channel = rgb_array[:,:, 1] > 0.9
+    b_channel = rgb_array[:,:,2] > 0.9
+
+    binary_array = np.where(r_channel | g_channel | b_channel, 1, 0)
+    final_array=np.expand_dims(binary_array, -1)
+
+    return final_array
 
 def cropped_resized_images(format_crop=3335,resize_params=544,train=False,category=1):
     """
