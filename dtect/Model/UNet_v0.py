@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
     # Exemple avec 1 image
     x = torch.from_numpy(cropped_resized_images(train=True, category=2, resize_params=128)[0].reshape(15, 3, 128, 128).astype(np.float32))
-    y = torch.from_numpy(cropped_resized_images(train=True, category=2, resize_params=128)[0].reshape(15, 1, 128, 128).astype(np.float32)).float()
+    y = torch.from_numpy(cropped_resized_images(train=True, category=2, resize_params=128)[1].reshape(15, 1, 128, 128).astype(np.float32)).float()
     # Forward pass
     output = model(x)
 
