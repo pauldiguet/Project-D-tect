@@ -8,8 +8,8 @@ import torch.optim as optim
 import torch.nn as nn
 import numpy as np
 import pandas as pd
-from Data_preparation.preprocessing import cropped_resized_images
-from Model.model_3 import UNet
+from dtect.Data_preparation.preprocessing import cropped_resized_images
+from dtect.Model.model_3 import UNet
 import matplotlib.pyplot as plt
 
 def train_model(model, optimizer, criterion, num_epochs=10, image_size=128,category=1,train=True):
