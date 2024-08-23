@@ -9,4 +9,4 @@ setup(name='d-tect',
       version="0.1",
       description="d-tect_wagon_project",
       install_requires=requirements,
-      packages=["dtect"])
+      packages=find_packages())
