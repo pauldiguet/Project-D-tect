@@ -15,12 +15,13 @@ def open_files(category=1,train=False):
     filenames_cat=[]
     filenames=[]
     images=[]
-    trainwkd=pd.read_csv('Data/raw_data/train_wkt_v4.csv')
-    names=trainwkd['ImageId'].drop_duplicates()
+
 
     if os.environ.get("FILE_TARGET") == "gcs":
         client = storage.Client()
         bucket_transfo = client.bucket(os.environ.get("BUCKET_TRANSFO"))
+        trainwkd=pd.read_csv(bucket_transfo.blob("train_wkt_v4.csv"))
+        names=trainwkd['ImageId'].drop_duplicates()
         Images = bucket_transfo.blob(f"three_band_preproc")
         geojsons = bucket_transfo.blob(f"three_band_geo_proc/Class_{category}")
 
@@ -45,6 +46,8 @@ def open_files(category=1,train=False):
                             filenames.append(filename.split('.')[0])
 
     else:
+        trainwkd=pd.read_csv('Data/raw_data/train_wkt_v4.csv')
+        names=trainwkd['ImageId'].drop_duplicates()
         if train==True:
             for filename in os.listdir(f'Data/processed_data/three_band_geo_proc/Class_{category}'):
                 file_path = os.path.join(f'Data/processed_data/three_band_geo_proc/Class_{category}', filename)
@@ -69,12 +72,12 @@ def open_files(category=1,train=False):
 
         else:
             for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
-                    file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
-                    if filename.split('.')[0] not in names:
-                        if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"Data/processed_data/three_band_preproc/.gitkeep":
-                            img = Image.open(file_path)
-                            images.append(img)
-                            filenames.append(filename)
+                file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
+                if filename.split('.')[0] not in names:
+                    if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"Data/processed_data/three_band_preproc/.gitkeep":
+                        img = Image.open(file_path)
+                        images.append(img)
+                        filenames.append(filename)
 
 
     return images_cat,images
