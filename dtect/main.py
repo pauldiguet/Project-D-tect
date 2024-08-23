@@ -36,7 +36,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128,categ
         # Convertir la liste de prédictions en un tableau NumPy
         predictions = np.array(pred)
         print(f'Predictions shape: {predictions.shape}')
-        plt.imshow(predictions, cmap='gray')
+        plt.show()
 
     print("Model training complete")
 
