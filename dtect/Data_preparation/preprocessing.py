@@ -22,7 +22,7 @@ def open_files(category=1,train=False):
     if train==True:
         for filename in os.listdir(f'Data/processed_data/three_band_geo_proc/Class_{category}'):
             file_path = os.path.join(f'Data/processed_data/three_band_geo_proc/Class_{category}', filename)
-            if file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"/Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
+            if file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
                 img = Image.open(file_path)
                 images_cat.append(img)
                 filenames_cat.append(filename.split('.')[0][:-6])
@@ -50,7 +50,7 @@ def open_files(category=1,train=False):
                 file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
                 if filename.split('.')[0] not in names:
 
-                    if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc/.gitkeep":
+                    if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"Data/processed_data/three_band_preproc/.gitkeep":
 
                         img = Image.open(file_path)
                         images.append(img)
@@ -68,13 +68,20 @@ def cropping(X,format_crop):
     format_cropped = (0, 0, format_crop, format_crop) # cropping rule basé sur les dimensions les plus réduites du dataset
     return X.crop(format_cropped)
 
-def binary(image):
-    image[image == 255] = 1
-    BinaryNP = image[:,:,1]
-    BinaryNP = np.expand_dims(BinaryNP, axis=2)
+def binary(rgb_array):
+    """
+    Converts an RGB image array to a binary image array without converting to binary.
 
+    - numpy.ndarray: A binary image array with shape (height, width) and values 0 or 1.
+    """
 
-    return BinaryNP
+    r_channel = rgb_array[:,:, 0] > 0.9
+    g_channel = rgb_array[:,:, 1] > 0.9
+    b_channel = rgb_array[:,:,2] > 0.9
+
+    binary_array = np.where(r_channel | g_channel | b_channel, 1, 0)
+
+    return binary_array
 
 def cropped_resized_images(format_crop=3335,resize_params=544,train=False,category=1):
     """
