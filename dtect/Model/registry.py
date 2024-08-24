@@ -49,6 +49,6 @@ def load_model() -> torch.Model:
 
         return model
     except:
-        print(f"\n❌ No model found in GCS bucket {os.environ.get("BUCKET_TRANSFO")}")
+        print(f"\n❌ No model found in GCS bucket {'data-transfo'}")
 
         return None
