@@ -1,97 +1,103 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
+import pandas as pd
 import numpy as np
 from dtect.Data_preparation.preprocessing import cropped_resized_images
+from PIL import Image
+import imageio
 import matplotlib.pyplot as plt
-class DoubleConv(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(DoubleConv, self).__init__()
-        self.conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, 3, 1, 1, bias=False),
+class UNet(nn.Module):
+    def __init__(self):
+        super(UNet, self).__init__()
+        # Partie descendante (Encoder)
+        self.enc1 = self.conv_block(3, 64, kernel_size=3, padding='same')
+        self.enc2 = self.conv_block(64, 128, kernel_size=3, padding='same')
+        self.enc3 = self.conv_block(128, 256, kernel_size=3, padding='same')
+        self.enc4 = self.conv_block(256, 512, kernel_size=3, padding='same')
+        self.bottleneck = self.conv_block(512, 1024, kernel_size=3, padding='same')
+        # Partie ascendante (Decoder)
+        self.upsamp4 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.downconv4 = nn.Conv2d(in_channels=1024, out_channels=512, kernel_size=2, stride=1, padding='same')
+        self.dec4 = self.conv_block(1024, 512, kernel_size=3, padding='same')
+        self.upsamp3 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.downconv3 = nn.Conv2d(in_channels=512, out_channels=256, kernel_size=2, stride=1, padding='same')
+        self.dec3 = self.conv_block(512, 256, kernel_size=3, padding='same')
+        self.upsamp2 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.downconv2 = nn.Conv2d(in_channels=256, out_channels=128, kernel_size=2, stride=1, padding='same')
+        self.dec2 = self.conv_block(256, 128, kernel_size=3, padding='same')
+        self.upsamp1 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.downconv1 = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=2, stride=1, padding='same')
+        self.dec1 = self.conv_block(128, 64, kernel_size=3, padding='same')
+        # Couches de sortie
+        self.conv_out = nn.Conv2d(64, 1, kernel_size=1)
+        self.sigm = nn.Sigmoid()
+    def conv_block(self, in_channels, out_channels, kernel_size, padding):
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size, padding=padding),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(out_channels),
-            nn.Conv2d(out_channels, out_channels, 3, 1, 1, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size, padding=padding),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(out_channels),
         )
     def forward(self, x):
-        return self.conv(x)
-class UNet(nn.Module):
-    def __init__(self, in_channels=3, out_channels=1, features=[64, 128, 256,512]):
-        super(UNet, self).__init__()
-        self.ups = nn.ModuleList()
-        self.downs = nn.ModuleList()
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        # Downward path (Encoder)
-        self.down1 = DoubleConv(in_channels, features[0])
-        self.down2 = DoubleConv(features[0], features[1])
-        self.down3 = DoubleConv(features[1], features[2])
-        # Bottleneck
-        self.bottleneck = DoubleConv(features[2], features[2] * 2)
-        # Upward path (Decoder)
-        self.up1 = nn.ConvTranspose2d(features[2] * 2, features[2], kernel_size=2, stride=2)
-        self.up_conv1 = DoubleConv(features[2] * 2, features[2])
-        self.up2 = nn.ConvTranspose2d(features[2], features[1], kernel_size=2, stride=2)
-        self.up_conv2 = DoubleConv(features[1] * 2, features[1])
-        self.up3 = nn.ConvTranspose2d(features[1], features[0], kernel_size=2, stride=2)
-        self.up_conv3 = DoubleConv(features[0] * 2, features[0])
-        # Final convolution
-        self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=1)
-    def forward(self, x):
-        # Downward path
-        skip_connections = []
-        x1 = self.down1(x)
-        skip_connections.append(x1)
-        x = self.pool(x1)
-        x2 = self.down2(x)
-        skip_connections.append(x2)
-        x = self.pool(x2)
-        x3 = self.down3(x)
-        skip_connections.append(x3)
-        x = self.pool(x3)
-        # Bottleneck
-        x = self.bottleneck(x)
-        # Upward path
-        x = self.up1(x)
-        x = torch.cat((x, skip_connections[2]), dim=1)
-        x = self.up_conv1(x)
-        x = self.up2(x)
-        x = torch.cat((x, skip_connections[1]), dim=1)
-        x = self.up_conv2(x)
-        x = self.up3(x)
-        x = torch.cat((x, skip_connections[0]), dim=1)
-        x = self.up_conv3(x)
-        return torch.sigmoid(self.final_conv(x))
-    def prediction(self, X):
+        # Encoder
+        enc1 = self.enc1(x)
+        enc2 = self.enc2(F.max_pool2d(enc1, 2))
+        enc3 = self.enc3(F.max_pool2d(enc2, 2))
+        enc4 = self.enc4(F.max_pool2d(enc3, 2))
+        bottleneck = self.bottleneck(F.max_pool2d(enc4, 2))
+        # Decoder with skip connections
+        dec4 = self.upsamp4(bottleneck)
+        dec4 = self.downconv4(dec4)
+        dec4 = torch.cat((dec4, enc4), dim=1)
+        dec4 = self.dec4(dec4)
+        dec3 = self.upsamp3(dec4)
+        dec3 = self.downconv3(dec3)
+        dec3 = torch.cat((dec3, enc3), dim=1)
+        dec3 = self.dec3(dec3)
+        dec2 = self.upsamp2(dec3)
+        dec2 = self.downconv2(dec2)
+        dec2 = torch.cat((dec2, enc2), dim=1)
+        dec2 = self.dec2(dec2)
+        dec1 = self.upsamp1(dec2)
+        dec1 = self.downconv1(dec1)
+        dec1 = torch.cat((dec1, enc1), dim=1)
+        dec1 = self.dec1(dec1)
+        out = self.conv_out(dec1)
+        pred = self.sigm(out)
+        return pred
+    def prediction(self,X):
         with torch.no_grad():
-            return self.forward(torch.from_numpy(X.reshape(1, 3, 512, 512).astype(np.float32))).detach().numpy().reshape(512, 512)
+            return self.forward(torch.from_numpy(X.reshape(1,3, 512, 512).astype(np.float32))).detach().numpy().reshape(512, 512)
 if __name__ == '__main__':
-    # Initialize the model
+    # Initialiser le modèle
     model = UNet()
-    # Optimizer & loss function (Adam & Binary-cross entropy)
+    # optimizer & loss function (Adam & Binary-cross entropy)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.BCELoss()
-    # Example with 1 image
-    images = cropped_resized_images(train=True, category=2, resize_params=512)
-    x = torch.from_numpy(images[0].reshape(-1, 3, 512, 512).astype(np.float32))
-    y = torch.from_numpy(images[1].reshape(-1, 1, 512, 512).astype(np.float32)).float()
+    # Exemple avec 1 image
+    images = cropped_resized_images(train=True, category=2, resize_params=128)
+    x = torch.from_numpy(images[0].reshape(-1, 3, 128, 128).astype(np.float32))
+    y = torch.from_numpy(images[1].reshape(-1, 1, 128, 128).astype(np.float32)).float()
     # Forward pass
     for epoch in range(30):
         model.train()
         output = model(x)
-        # Calculate the loss
+    # Calcul de la loss
         loss = criterion(output, y)
-        # Backward pass & optimization
+    # Backward pass & optimization
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         print(f'Loss: {loss.item()}')
     # Prediction (X_test)
     X_test = images[0][5]
-    model.eval()  # Evaluation mode to disable dropout and batch normalization
+    model.eval()  # Mode évaluation pour désactiver le dropout et la normalisation par batch
     pred = model.prediction(X_test)
-    # Convert the list of predictions into a NumPy array
+    # Convertir la liste de prédictions en un tableau NumPy
     predictions = np.array(pred)
     print(f'Predictions shape: {predictions.shape}')
     plt.imshow(predictions, cmap='gray')
