@@ -65,7 +65,7 @@ class UNet(nn.Module):
         return torch.sigmoid(self.final_conv(x))
     def prediction(self, X):
         with torch.no_grad():
-            return self.forward(torch.from_numpy(X.reshape(1, 3, 128, 128).astype(np.float32))).detach().numpy().reshape(128, 128)
+            return self.forward(torch.from_numpy(X.reshape(1, 3, 512, 512).astype(np.float32))).detach().numpy().reshape(512, 512)
 if __name__ == '__main__':
     # Initialize the model
     model = UNet()
@@ -73,9 +73,9 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.BCELoss()
     # Example with 1 image
-    images = cropped_resized_images(train=True, category=2, resize_params=128)
-    x = torch.from_numpy(images[0].reshape(-1, 3, 128, 128).astype(np.float32))
-    y = torch.from_numpy(images[1].reshape(-1, 1, 128, 128).astype(np.float32)).float()
+    images = cropped_resized_images(train=True, category=2, resize_params=512)
+    x = torch.from_numpy(images[0].reshape(-1, 3, 512, 512).astype(np.float32))
+    y = torch.from_numpy(images[1].reshape(-1, 1, 512, 512).astype(np.float32)).float()
     # Forward pass
     for epoch in range(30):
         model.train()
