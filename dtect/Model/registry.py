@@ -5,12 +5,28 @@ import torch
 from dtect.Model.UNet_v0 import UNet
 from google.cloud import storage
 
-def save_model(model = None) -> None:
+def save_model(model=None) -> None:
+    # Générer un horodatage
     timestamp = time.strftime("%Y%m%d-%H%M%S")
+
+    # Chemin vers le fichier temporaire local
+    local_path = f"../model_results/{timestamp}.h5"
+
+    # Sauvegarder le modèle localement
+    torch.save(model.state_dict(), local_path)
+
+    # Initialiser le client GCS et spécifier le bucket
     client = storage.Client()
-    bucket = client.bucket(os.environ.get("BUCKET_TRANSFO"))
+    bucket = client.bucket("data-transfo")
+
+    # Créer un blob pour le fichier dans le bucket
     blob = bucket.blob(f"data-results/{timestamp}.h5")
-    torch.save(model.state_dict(), blob)
+
+    # Télécharger le fichier local vers GCS
+    blob.upload_from_filename(local_path)
+
+    # Supprimer le fichier temporaire local pour économiser de l'espace
+    os.remove(local_path)
 
     print("✅ Model saved to GCS")
 
@@ -19,7 +35,7 @@ def save_model(model = None) -> None:
 
 def load_model() -> torch.Model:
     client = storage.Client()
-    bucket = client.bucket(os.environ.get("BUCKET_TRANSFO"))
+    bucket = client.bucket("data-transfo")
     blobs = bucket.blob(f"data-results/*")
 
     try:
