@@ -71,7 +71,7 @@ class UNet(nn.Module):
         return pred
     def prediction(self,X):
         with torch.no_grad():
-            return self.forward(torch.from_numpy(X.reshape(1,3, 512, 512).astype(np.float32))).detach().numpy().reshape(512, 512)
+            return self.forward(torch.from_numpy(X.reshape(1,3, 128, 128).astype(np.float32))).detach().numpy().reshape(128,128)
 if __name__ == '__main__':
     # Initialiser le modèle
     model = UNet()
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     x = torch.from_numpy(images[0].reshape(-1, 3, 128, 128).astype(np.float32))
     y = torch.from_numpy(images[1].reshape(-1, 1, 128, 128).astype(np.float32)).float()
     # Forward pass
-    for epoch in range(30):
+    for epoch in range(300):
         model.train()
         output = model(x)
     # Calcul de la loss
@@ -92,7 +92,7 @@ if __name__ == '__main__':
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        print(f'Loss: {loss.item()}')
+        print(f'{epoch}. Loss: {loss.item()}')
     # Prediction (X_test)
     X_test = images[0][5]
     model.eval()  # Mode évaluation pour désactiver le dropout et la normalisation par batch

@@ -40,7 +40,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128,categ
 
     print("Model training complete")
 
-def main(category=1, image_size=512,lr=0.001):
+def main(category=1, image_size=128,lr=0.001):
     model = UNet()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.BCELoss()
@@ -50,4 +50,4 @@ def main(category=1, image_size=512,lr=0.001):
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(1,512)
+    main(1,128)
