@@ -33,7 +33,7 @@ def save_model(model=None) -> None:
     return None
 
 
-def load_model() -> torch.Model:
+def load_model():
     client = storage.Client()
     bucket = client.bucket("data-transfo")
     blobs = bucket.blob(f"data-results/*")
