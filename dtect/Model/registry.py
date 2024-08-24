@@ -10,7 +10,7 @@ def save_model(model=None) -> None:
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
     # Chemin vers le fichier temporaire local
-    local_path = f"../model_results/{timestamp}.h5"
+    local_path = f"model_results/{timestamp}.h5"
 
     # Sauvegarder le modèle localement
     torch.save(model.state_dict(), local_path)
