@@ -45,7 +45,7 @@ def main(category=1, image_size=512,lr=0.001):
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.BCELoss()
 
-    train_model(model, optimizer, criterion, num_epochs=1,image_size=image_size,category=category)
+    train_model(model, optimizer, criterion, num_epochs=500,image_size=image_size,category=category)
 
     print("All steps completed successfully")
 
