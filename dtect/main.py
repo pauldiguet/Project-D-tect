@@ -43,7 +43,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         plt.savefig(f'plot_results/plot{epoch}_{image_size}.png')
         plt.close()  # Fermer la figure pour libérer de la mémoire
 
-        if (epoch + 1) % 10 == 0:
+        if (epoch + 1) % 100 == 0:
             save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
 
     save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
