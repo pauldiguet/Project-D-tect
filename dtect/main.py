@@ -16,10 +16,6 @@ import matplotlib.pyplot as plt
 def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, category=1, train=True):
     X, Y = cropped_resized_images(train=train, category=category, resize_params=image_size)
 
-    # Assurez-vous que le répertoire pour les graphiques existe
-    plot_results_dir = '../plot_results/'
-    os.makedirs(plot_results_dir, exist_ok=True)
-
     for epoch in range(num_epochs):
 
         X_tensor = torch.from_numpy(X.reshape(-1, 3, image_size, image_size).astype(np.float32))
@@ -44,7 +40,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         plt.imshow(predictions, cmap='gray')
 
         # Spécifier le chemin complet pour sauvegarder le fichier
-        plt.savefig(os.path.join(plot_results_dir, f'plot{epoch}_{image_size}.png'))
+        plt.savefig(f'plot_results/plot{epoch}_{image_size}.png')
         plt.close()  # Fermer la figure pour libérer de la mémoire
 
         if (epoch + 1) % 10 == 0:
