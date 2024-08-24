@@ -2,6 +2,7 @@
 Main file : Project-D-tect
 
 """
+import os
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -15,12 +16,16 @@ import matplotlib.pyplot as plt
 def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, category=1, train=True):
     X, Y = cropped_resized_images(train=train, category=category, resize_params=image_size)
 
+    # Assurez-vous que le répertoire pour les graphiques existe
+    plot_results_dir = '../plot_results/'
+    os.makedirs(plot_results_dir, exist_ok=True)
+
     for epoch in range(num_epochs):
 
         X_tensor = torch.from_numpy(X.reshape(-1, 3, image_size, image_size).astype(np.float32))
         Y_tensor = torch.from_numpy(Y.reshape(-1, 1, image_size, image_size).astype(np.float32)).float()
 
-        model.train()  # S'assurer que le modèle est en mode entraînement
+        model.train()  # Mode entraînement
         outputs = model(X_tensor)
         loss = criterion(outputs, Y_tensor)
 
@@ -30,14 +35,17 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
 
         print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
-        model.eval()  # Mode évaluation pour désactiver le dropout et la normalisation par batch
+        model.eval()  # Mode évaluation
         X_test = X[5].reshape(1, 3, image_size, image_size)  # Adapter la dimension de X_test
         X_test_tensor = torch.from_numpy(X_test.astype(np.float32))
         pred = model(X_test_tensor)
         predictions = pred.squeeze().detach().numpy()  # Retirer le tenseur et convertir en numpy
         print(f'Predictions shape: {predictions.shape}')
         plt.imshow(predictions, cmap='gray')
-        plt.savefig(f'../plot_results/plot{epoch}_{image_size}.png')
+
+        # Spécifier le chemin complet pour sauvegarder le fichier
+        plt.savefig(os.path.join(plot_results_dir, f'plot{epoch}_{image_size}.png'))
+        plt.close()  # Fermer la figure pour libérer de la mémoire
 
         if (epoch + 1) % 10 == 0:
             save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
@@ -45,15 +53,3 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
     save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
 
     print("Model training complete")
-
-def main(category=1, image_size=128, lr=0.001):
-    model = UNet()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
-    criterion = nn.BCELoss()
-
-    train_model(model, optimizer, criterion, num_epochs=500, image_size=image_size, category=category)
-
-    print("All steps completed successfully")
-
-if __name__ == "__main__":
-    main(1, 128)
