@@ -9,7 +9,7 @@ import torch.nn as nn
 import numpy as np
 import pandas as pd
 from dtect.Data_preparation.preprocessing import cropped_resized_images
-from dtect.Model.registry import save_model, load_model
+from dtect.Model.registry import save_model, save_fig_pred
 from dtect.Model.model_3 import UNet
 import matplotlib.pyplot as plt
 
@@ -22,13 +22,14 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         Y_tensor = torch.from_numpy(Y.reshape(-1, 1, image_size, image_size).astype(np.float32)).float()
 
         model.train()  # Mode entraînement
+        print("passed train mod")
         outputs = model(X_tensor)
         loss = criterion(outputs, Y_tensor)
-
+        print("passed train")
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+        print("almost at loss display")
         print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
         model.eval()  # Mode évaluation
@@ -37,11 +38,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         pred = model(X_test_tensor)
         predictions = pred.squeeze().detach().numpy()  # Retirer le tenseur et convertir en numpy
         print(f'Predictions shape: {predictions.shape}')
-        plt.imshow(predictions, cmap='gray')
-
-        # Spécifier le chemin complet pour sauvegarder le fichier
-        plt.savefig(f'plot_results/plot{epoch}_{image_size}.png')
-        plt.close()  # Fermer la figure pour libérer de la mémoire
+        save_fig_pred(epoch, image_size, predictions)
 
         if (epoch + 1) % 100 == 0:
             save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
@@ -51,14 +48,14 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
     print("Model training complete")
 
 
-def main(category=1, image_size=128, lr=0.001):
+def main(category=1, image_size=128, lr=0.01, epochs=250):
     model = UNet()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.BCELoss()
 
-    train_model(model, optimizer, criterion, num_epochs=500, image_size=image_size, category=category)
+    train_model(model, optimizer, criterion, num_epochs=epochs, image_size=image_size, category=category)
 
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(1, 128)
+    main(8, 512, epochs=400)

@@ -22,3 +22,5 @@
 .DS_Store
 __pycache__
 *.egg-info
+model_results/
+plot_results/
