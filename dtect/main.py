@@ -22,13 +22,13 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         Y_tensor = torch.from_numpy(Y.reshape(-1, 1, image_size, image_size).astype(np.float32)).float()
 
         model.train()  # Mode entraînement
+        print("passed train mod")
         outputs = model(X_tensor)
         loss = criterion(outputs, Y_tensor)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
         print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
         model.eval()  # Mode évaluation
