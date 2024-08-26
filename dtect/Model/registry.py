@@ -4,6 +4,7 @@ import torch
 
 from dtect.Model.UNet_v0 import UNet
 from google.cloud import storage
+import matplotlib.pyplot as plt
 
 def save_model(model=None) -> None:
     # Générer un horodatage
@@ -28,7 +29,32 @@ def save_model(model=None) -> None:
     # Supprimer le fichier temporaire local pour économiser de l'espace
     os.remove(local_path)
 
-    print("✅ Model saved locally")
+    print("✅ Model saved on GCS")
+
+    return None
+
+def save_fig_pred(epoch, image_size, fig=None) -> None:
+
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    plt.imshow(fig, cmap='gray')
+
+    plt.savefig(f'plot_results/plot{epoch}_{image_size}.png')
+    plt.close()
+
+    # Initialiser le client GCS et spécifier le bucket
+    client = storage.Client()
+    bucket = client.bucket("data-transfo")
+
+    # Créer un blob pour le fichier dans le bucket
+    blob = bucket.blob(f"data-transfo/data-results/plot_results/plot{epoch}_{image_size}_{timestamp}")
+
+    # Télécharger le fichier local vers GCS
+    blob.upload_from_filename(f'plot_results/plot{epoch}_{image_size}.png')
+
+    # Supprimer le fichier temporaire local pour économiser de l'espace
+    os.remove(f'plot_results/plot{epoch}_{image_size}.png')
+
+    print("✅ Plot saved on GCS")
 
     return None
 

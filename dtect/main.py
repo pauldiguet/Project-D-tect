@@ -9,7 +9,7 @@ import torch.nn as nn
 import numpy as np
 import pandas as pd
 from dtect.Data_preparation.preprocessing import cropped_resized_images
-from dtect.Model.registry import save_model, load_model
+from dtect.Model.registry import save_model, save_fig_pred
 from dtect.Model.model_3 import UNet
 import matplotlib.pyplot as plt
 
@@ -37,11 +37,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         pred = model(X_test_tensor)
         predictions = pred.squeeze().detach().numpy()  # Retirer le tenseur et convertir en numpy
         print(f'Predictions shape: {predictions.shape}')
-        plt.imshow(predictions, cmap='gray')
-
-        # Spécifier le chemin complet pour sauvegarder le fichier
-        plt.savefig(f'plot_results/plot{epoch}_{image_size}.png')
-        plt.close()  # Fermer la figure pour libérer de la mémoire
+        save_fig_pred(epoch, image_size, predictions)
 
         if (epoch + 1) % 100 == 0:
             save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
@@ -61,4 +57,4 @@ def main(category=1, image_size=128, lr=0.01, epochs=250):
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(1, 128, epochs=400)
+    main(8, 512, epochs=400)
