@@ -14,3 +14,4 @@ geopandas
 shapely
 scikit-image
 pillow
+pytorch-lightning
