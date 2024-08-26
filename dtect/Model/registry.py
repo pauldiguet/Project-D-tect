@@ -36,9 +36,11 @@ def save_model(model=None) -> None:
 def save_fig_pred(epoch, image_size, fig=None) -> None:
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
-    plt.imshow(fig, cmap='gray')
 
-    plt.savefig(f'plot_results/plot{epoch}_{image_size}.png')
+    local_path = f'plot_results/plot{epoch}_{image_size}_{timestamp}.png'
+
+    plt.imshow(fig, cmap='gray')
+    plt.savefig(local_path)
     plt.close()
 
     # Initialiser le client GCS et spécifier le bucket
@@ -49,10 +51,10 @@ def save_fig_pred(epoch, image_size, fig=None) -> None:
     blob = bucket.blob(f"data-results/plot_results")
 
     # Télécharger le fichier local vers GCS
-    blob.upload_from_filename(f'plot_results/plot{epoch}_{image_size}.png')
+    blob.upload_from_filename(local_path)
 
     # Supprimer le fichier temporaire local pour économiser de l'espace
-    os.remove(f'plot_results/plot{epoch}_{image_size}.png')
+    os.remove(local_path)
 
     print("✅ Plot saved on GCS")
 
