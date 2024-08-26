@@ -34,7 +34,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
 
         model.eval()  # Mode évaluation
 
-        X_test_tensor = torch.from_numpy(test_X.reshape(1, 3, image_size, image_size).astype(np.float32))          # Adapter la dimension de X_test
+        X_test_tensor = torch.from_numpy(test_X.reshape(1, 3, image_size, image_size).astype(np.float32))
         pred = model(X_test_tensor)
         predictions = pred.squeeze().detach().numpy()  # Retirer le tenseur et convertir en numpy
 
@@ -60,4 +60,4 @@ def main(category=1, image_size=128, lr=0.01, epochs=250):
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(8, 512, epochs=400)
+    main(8, 256, epochs=400)

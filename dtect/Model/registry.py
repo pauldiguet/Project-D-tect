@@ -48,7 +48,7 @@ def save_fig_pred(epoch, image_size, fig=None) -> None:
     bucket = client.bucket("data-transfo")
 
     # Créer un blob pour le fichier dans le bucket
-    blob = bucket.blob(f"data-results/plot_results")
+    blob = bucket.blob(f"data-results/plot_results/plot{epoch}_{image_size}_{timestamp}.png")
 
     # Télécharger le fichier local vers GCS
     blob.upload_from_filename(local_path)
