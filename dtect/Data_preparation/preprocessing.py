@@ -120,6 +120,32 @@ def binary(rgb_array):
 
     return final_array
 
+def data_augmentation():
+    train_X,test_X,train_Y, test_Y = cropped_resized_images()
+    X_train_aug = []
+    X_test_aug = []
+    train_Y_aug = []
+    test_Y_aug = []
+
+    def rotate_dataset(ds):
+        ds_aug = []
+        for image in ds:
+            for i in range(4):
+                ds_aug.append(image.rotate(90*i))
+        print(len(ds_aug))
+        ds_array = np.array(ds_aug)
+        print(ds_array.shape)
+        return ds_array
+
+
+    X_train_aug = rotate_dataset(train_X)
+    X_test_aug = rotate_dataset(test_X)
+    train_Y_aug = rotate_dataset(train_Y)
+    test_Y_aug = rotate_dataset(test_Y)
+
+
+    return X_train_aug, X_test_aug, train_Y_aug, test_Y_aug
+
 def cropped_resized_images(format_crop=3335,resize_params=512,train=True,category=1):
     """
     crops and resizes all images and put them in a list
@@ -128,6 +154,8 @@ def cropped_resized_images(format_crop=3335,resize_params=512,train=True,categor
     image_cat, images=open_files(train=train, category=category)
     processed_image_X = None  # Initialisation
     processed_image_Y = None  # Initialisation
+
+
 
     if len(image_cat) == 0:
         processed_image=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
