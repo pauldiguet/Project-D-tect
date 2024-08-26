@@ -16,3 +16,4 @@ scikit-image==0.24.0
 pillow==10.4.0
 google==3.0.0
 google-cloud-storage==2.4.0
+pytorch-lightning
