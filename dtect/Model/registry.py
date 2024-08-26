@@ -16,17 +16,17 @@ def save_model(model=None) -> None:
     torch.save(model.state_dict(), local_path)
 
     # Initialiser le client GCS et spécifier le bucket
-    #client = storage.Client()
-    #bucket = client.bucket("data-transfo")
+    client = storage.Client()
+    bucket = client.bucket("data-transfo")
 
     # Créer un blob pour le fichier dans le bucket
-    #blob = bucket.blob(f"data-results/{timestamp}.h5")
+    blob = bucket.blob(f"data-results/{timestamp}.h5")
 
     # Télécharger le fichier local vers GCS
-    #blob.upload_from_filename(local_path)
+    blob.upload_from_filename(local_path)
 
     # Supprimer le fichier temporaire local pour économiser de l'espace
-    #os.remove(local_path)
+    os.remove(local_path)
 
     print("✅ Model saved locally")
 
