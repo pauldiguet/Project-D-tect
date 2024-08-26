@@ -80,3 +80,30 @@ def load_model():
         print(f"\n❌ No model found in GCS bucket {'data-transfo'}")
 
         return None
+
+def save_fig_Y(fig=None) -> None:
+
+
+
+    local_path = f'plot_results/plot_Y.png'
+
+    plt.imshow(fig, cmap='gray')
+    plt.savefig(local_path)
+    plt.close()
+
+    # Initialiser le client GCS et spécifier le bucket
+    client = storage.Client()
+    bucket = client.bucket("data-transfo")
+
+    # Créer un blob pour le fichier dans le bucket
+    blob = bucket.blob(f"data-results/plot_results")
+
+    # Télécharger le fichier local vers GCS
+    blob.upload_from_filename(local_path)
+
+    # Supprimer le fichier temporaire local pour économiser de l'espace
+    os.remove(local_path)
+
+    print("✅ Plot of Y saved on GCS")
+
+    return None

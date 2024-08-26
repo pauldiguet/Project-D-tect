@@ -132,10 +132,10 @@ def cropped_resized_images(format_crop=3335,resize_params=512,train=True,categor
     if len(image_cat) == 0:
         processed_image=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
     else:
-        train_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])[:round(70*len(images)/100)]
-        test_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])[round(70*len(images)/100):]
+        train_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])[:-1]
+        test_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])[-1]
 
-        train_Y=np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])[:round(70*len(image_cat)/100)]
-        test_Y=  np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])[round(70*len(image_cat)/100):]
+        train_Y=np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])[:-1]
+        test_Y=  np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])[-1]
 
     return train_X,test_X,train_Y, test_Y
