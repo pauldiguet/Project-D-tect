@@ -25,10 +25,11 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         print("passed train mod")
         outputs = model(X_tensor)
         loss = criterion(outputs, Y_tensor)
-
+        print("passed train")
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        print("almost at loss display")
         print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
         model.eval()  # Mode évaluation
