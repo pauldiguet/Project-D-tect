@@ -1,14 +1,26 @@
 # Files to ignore
 *.ipynb
-*.csv
 .python-version
+
+# data
 *.tif
 *.jpg
 *.geojson
-**__MACOSX/
-**.DS_Store
-.env
+*.csv
 *.json
+
+# environnement
 .envrc
-*.vscode
+.env
+
+
+# vrac
+**__MACOSX/
+
+
+# New files / folders
+.DS_Store
 __pycache__
+*.egg-info
+model_results/
+plot_results/

@@ -5,8 +5,8 @@ from skimage.transform import resize
 import numpy as np
 import pandas as pd
 from google.cloud import storage
-
-def open_files(category=1,train=False):
+import io
+def open_files(category=1,train=True):
     """
     Open all transformed images as PIL images
     return => a list of PIL images
@@ -15,46 +15,61 @@ def open_files(category=1,train=False):
     filenames_cat=[]
     filenames=[]
     images=[]
-    trainwkd=pd.read_csv('Data/raw_data/train_wkt_v4.csv')
-    names=trainwkd['ImageId'].drop_duplicates()
-    
+
     if os.environ.get("FILE_TARGET") == "gcs":
         client = storage.Client()
-        bucket_transfo = client.bucket(os.environ.get("BUCKET_TRANSFO"))
-        Images = bucket_transfo.blob(f"three_band_preproc")
-        geojsons = bucket_transfo.blob(f"three_band_geo_proc/Class_{category}")
-        
-        if train==True:
-            for filename in os.listdir(geojsons):
-                file_path = os.path.join(geojsons, filename)
-                img = Image.open(file_path)
-                images_cat.append(img)
+        bucket_transfo = client.bucket("data-transfo")
+
+        # Téléchargement du CSV
+        blob_csv = bucket_transfo.blob("train_wkt_v4.csv")
+        csv_data = blob_csv.download_as_bytes()
+        trainwkd = pd.read_csv(io.BytesIO(csv_data))
+        names = trainwkd['ImageId'].drop_duplicates()
+
+        # Liste des fichiers GeoJSON
+        geojson_prefix = f"three_band_geo_proc/Class_{category}/"
+        blobs_geo = list(bucket_transfo.list_blobs(prefix=geojson_prefix))
+
+        # Liste des fichiers d'images
+        img_prefix = "three_band_preproc/"
+        blobs_img = list(bucket_transfo.list_blobs(prefix=img_prefix))
+
+        if train:
+            for blob_geo in blobs_geo:
+                filename = blob_geo.name.split("/")[-1]
+                print(filename)
+                geojson_data = blob_geo.download_as_bytes()
+                geojson_image = Image.open(io.BytesIO(geojson_data))
+                images_cat.append(geojson_image)
                 filenames_cat.append(filename.split('.')[0][:-6])
 
-            u=0
-            cats=filenames_cat.copy()
-            while len(cats)>0:
-                for filename in os.listdir(Images):
-                        file_path = os.path.join(Images, filename)
-                        if len(cats)==0:
-                            break
-                        if filename.split('.')[0] == cats[0]:
-                            cats.pop(0)
-                            img = Image.open(file_path)
-                            images.append(img)
-                            filenames.append(filename.split('.')[0])
-                            
+            cats = filenames_cat.copy()
+            while len(cats) > 0:
+                for blob_img in blobs_img:
+                    filename = blob_img.name.split("/")[-1]
+                    if len(cats) == 0:
+                        break
+                    if filename.split('.')[0] == cats[0]:
+                        cats.pop(0)
+                        img_data = blob_img.download_as_bytes()
+                        img = Image.open(io.BytesIO(img_data))
+                        images.append(img)
+                        filenames.append(filename.split('.')[0])
+
+
     else:
+        trainwkd=pd.read_csv('Data/raw_data/train_wkt_v4.csv')
+        names=trainwkd['ImageId'].drop_duplicates()
         if train==True:
             for filename in os.listdir(f'Data/processed_data/three_band_geo_proc/Class_{category}'):
                 file_path = os.path.join(f'Data/processed_data/three_band_geo_proc/Class_{category}', filename)
-                if file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"/Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
+                if file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.DS_Store" and file_path!= f"Data/processed_data/three_band_geo_proc/Class_{category}/.gitkeep":
                     img = Image.open(file_path)
                     images_cat.append(img)
                     filenames_cat.append(filename.split('.')[0][:-6])
             u=0
             cats=filenames_cat.copy()
-            
+
             while len(cats)>0:
                 for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
                         file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
@@ -66,15 +81,15 @@ def open_files(category=1,train=False):
                             images.append(img)
                             filenames.append(filename.split('.')[0])
 
-                            
+
         else:
             for filename in os.listdir(f'Data/processed_data/three_band_preproc'):
-                    file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
-                    if filename.split('.')[0] not in names:
-                        if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"/Users/kiradavidoff/code/pauldiguet/Project-D-tect/Data/processed_data/three_band_preproc/.gitkeep":
-                            img = Image.open(file_path)
-                            images.append(img)
-                            filenames.append(filename)
+                file_path = os.path.join(f'Data/processed_data/three_band_preproc', filename)
+                if filename.split('.')[0] not in names:
+                    if file_path!= f"Data/processed_data/three_band_preproc/.DS_Store" and file_path!= f"Data/processed_data/three_band_preproc/.gitkeep":
+                        img = Image.open(file_path)
+                        images.append(img)
+                        filenames.append(filename)
 
 
     return images_cat,images
@@ -105,16 +120,17 @@ def binary(rgb_array):
 
     return final_array
 
-def cropped_resized_images(format_crop=3335,resize_params=544,train=False,category=1):
+def cropped_resized_images(format_crop=3335,resize_params=512,train=True,category=1):
     """
     crops and resizes all images and put them in a list
     return => a df of plt arrays and image name
     """
-    image_cat,  images  =open_files(train=train, category=category)
+    image_cat, images=open_files(train=train, category=category)
+    processed_image_X = None  # Initialisation
+    processed_image_Y = None  # Initialisation
 
     if len(image_cat) == 0:
         processed_image=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
-
     else:
         processed_image_X=np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])
         processed_image_Y=np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])
