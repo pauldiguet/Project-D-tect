@@ -24,3 +24,4 @@ __pycache__
 *.egg-info
 model_results/
 plot_results/
+plot_results_1/

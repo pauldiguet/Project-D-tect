@@ -83,7 +83,7 @@ def load_model():
 
 def save_fig_Y(fig=None) -> None:
 
-
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
 
     local_path = f'plot_results/plot_Y.png'
 
@@ -96,7 +96,7 @@ def save_fig_Y(fig=None) -> None:
     bucket = client.bucket("data-transfo")
 
     # Créer un blob pour le fichier dans le bucket
-    blob = bucket.blob(f"data-results/plot_results")
+    blob = bucket.blob(f"data-results/plot_results/plot_Y_{timestamp}.png")
 
     # Télécharger le fichier local vers GCS
     blob.upload_from_filename(local_path)
