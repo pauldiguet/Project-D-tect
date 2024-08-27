@@ -140,12 +140,10 @@ def data_augmentation(format_crop=3335,resize_params=512,train=True,category=1):
 
 
     X_train_aug = rotate_dataset(train_X)
-    X_test_aug = rotate_dataset(test_X)
     train_Y_aug = rotate_dataset(train_Y)
-    test_Y_aug = rotate_dataset(test_Y)
 
 
-    return X_train_aug, X_test_aug, train_Y_aug, test_Y_aug
+    return X_train_aug, test_X, train_Y_aug, test_Y
 
 def cropped_resized_images(format_crop=3335,resize_params=512,train=True,category=1):
     """
