@@ -11,11 +11,12 @@ import pandas as pd
 from dtect.Data_preparation.preprocessing import data_augmentation, cropped_resized_images
 from dtect.Model.registry import save_model, save_fig_pred, save_fig_Y
 from dtect.Model.model_3 import UNet
+from dtect.Model.early_stopping import EarlyStopping
 import matplotlib.pyplot as plt
 
 def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, category=1, train=True):
     train_X,test_X,train_Y, test_Y = data_augmentation(train=train, category=category, resize_params=image_size)
-
+    early_stopping = EarlyStopping(patience=10, verbose=True, path='TBD')
     for epoch in range(num_epochs):
 
         X_tensor = torch.from_numpy(train_X.reshape(-1, 3, image_size, image_size).astype(np.float32))
@@ -40,6 +41,11 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
 
         print(f'Predictions shape: {predictions.shape}')
         save_fig_pred(epoch, image_size, predictions)
+
+        early_stopping(loss.item(), model)
+        if early_stopping.early_stop:
+            print("Early stopping")
+            break
 
         if (epoch + 1) % 100 == 0:
             save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
