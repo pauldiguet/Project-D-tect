@@ -68,4 +68,4 @@ def main(category=1, image_size=128, lr=0.01, epochs=250):
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(8, 64, epochs=500)
+    main(8, 256, epochs=500)
