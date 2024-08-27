@@ -1,7 +1,7 @@
 import numpy as np
 
 class EarlyStopping:
-    def __init__(self, patience=10, verbose=True):
+    def __init__(self, patience=40, verbose=True):
         self.patience = patience
         self.verbose = verbose
         self.counter = 0
