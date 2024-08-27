@@ -2,7 +2,6 @@
 Main file : Project-D-tect
 
 """
-import os
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -11,10 +10,14 @@ import pandas as pd
 from dtect.Data_preparation.preprocessing import data_augmentation
 from dtect.Model.registry import save_model, save_fig_pred, save_fig_Y
 from dtect.Model.model_3 import UNet
+from dtect.Model.early_stopping import EarlyStopping
 import matplotlib.pyplot as plt
+
 
 def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, category=1, train=True):
     train_X,test_X,train_Y, test_Y = data_augmentation(train=train, category=category, resize_params=image_size)
+
+    early_stopping = EarlyStopping(patience=10, verbose=True)
 
     for epoch in range(num_epochs):
 
@@ -41,6 +44,12 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         print(f'Predictions shape: {predictions.shape}')
         save_fig_pred(epoch, image_size, predictions)
 
+        # Check early stopping
+        early_stopping(loss.item())
+        if early_stopping.early_stop:
+            print("Early stopping")
+            break
+
         if (epoch + 1) % 100 == 0:
             save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
     save_fig_Y(fig=test_Y)
@@ -59,4 +68,4 @@ def main(category=1, image_size=128, lr=0.01, epochs=250):
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(8, 256, epochs=500)
+    main(8, 64, epochs=500)
