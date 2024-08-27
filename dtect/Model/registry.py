@@ -33,11 +33,11 @@ def save_model(model=None) -> None:
 
     return None
 
-def save_fig_pred(epoch, image_size, catergory=1,fig=None) -> None:
+def save_fig_pred(epoch, image_size, category=1,fig=None) -> None:
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
-    local_path = f'plot_results/plot{epoch}_{image_size}_{timestamp}_{catergory}.png'
+    local_path = f'plot_results/plot{epoch}_{image_size}_{timestamp}_{category}.png'
 
     plt.imshow(fig, cmap='gray')
     plt.savefig(local_path)
@@ -48,7 +48,7 @@ def save_fig_pred(epoch, image_size, catergory=1,fig=None) -> None:
     bucket = client.bucket("data-transfo")
 
     # Créer un blob pour le fichier dans le bucket
-    blob = bucket.blob(f"data-results/plot_results/plot{epoch}_{image_size}_{timestamp}_{catergory}.png")
+    blob = bucket.blob(f"data-results/plot_results/plot{epoch}_{image_size}_{timestamp}_{category}.png")
 
     # Télécharger le fichier local vers GCS
     blob.upload_from_filename(local_path)
@@ -81,11 +81,11 @@ def load_model():
 
         return None
 
-def save_fig_Y(fig=None) -> None:
+def save_fig_Y(category=1,fig=None) -> None:
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
-    local_path = f'plot_results/plot_Y.png'
+    local_path = f'plot_results/plot_Y_{category}.png'
 
     plt.imshow(fig, cmap='gray')
     plt.savefig(local_path)
