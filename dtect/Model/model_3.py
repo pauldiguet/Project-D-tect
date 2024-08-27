@@ -9,7 +9,7 @@ from PIL import Image
 import imageio
 import matplotlib.pyplot as plt
 
-size = 512
+size = 256
 class UNet(nn.Module):
     def __init__(self):
         super(UNet, self).__init__()
