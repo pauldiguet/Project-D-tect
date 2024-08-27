@@ -14,8 +14,12 @@ def open_files(category=1,train=True):
     filenames_cat=[]
     filenames=[]
     images=[]
+    X_test=[]
+    Y_test=[]
+
 
     if os.environ.get("FILE_TARGET") == "gcs":
+
         client = storage.Client()
         bucket_transfo = client.bucket("data-transfo")
 
@@ -39,8 +43,11 @@ def open_files(category=1,train=True):
                 print(filename)
                 geojson_data = blob_geo.download_as_bytes()
                 geojson_image = Image.open(io.BytesIO(geojson_data))
-                images_cat.append(geojson_image)
-                filenames_cat.append(filename.split('.')[0][:-6])
+                if  "6100_2_2" in filename:
+                    Y_test.append(geojson_image)
+                else:
+                    images_cat.append(geojson_image)
+                    filenames_cat.append(filename.split('.')[0][:-6])
 
             cats = filenames_cat.copy()
             while len(cats) > 0:
@@ -48,6 +55,11 @@ def open_files(category=1,train=True):
                     filename = blob_img.name.split("/")[-1]
                     if len(cats) == 0:
                         break
+                    if "6100_2_2" in filename:
+                        cats.pop(0)
+                        img_data = blob_img.download_as_bytes()
+                        img = Image.open(io.BytesIO(img_data))
+                        X_test.append(img)
                     if filename.split('.')[0] == cats[0]:
                         cats.pop(0)
                         img_data = blob_img.download_as_bytes()
@@ -91,7 +103,7 @@ def open_files(category=1,train=True):
                         filenames.append(filename)
 
 
-    return images_cat,images
+    return images_cat,images, X_test, Y_test
 
 def cropping(X,format_crop):
     """
@@ -134,7 +146,9 @@ def data_augmentation(format_crop=3335,resize_params=512,train=True,category=1):
 
 
     X_train_aug = rotate_dataset(train_X)
+    X_test_aug = test_X.copy()
     train_Y_aug = rotate_dataset(train_Y)
+    test_Y_aug = test_Y.copy()
 
 
     return X_train_aug, test_X, train_Y_aug, test_Y
@@ -144,7 +158,7 @@ def cropped_resized_images(format_crop=3335,resize_params=512,train=True,categor
     crops and resizes all images and put them in a list
     return => a df of plt arrays and image name
     """
-    image_cat, images=open_files(train=train, category=category)
+    image_cat, images, X_test,Y_test=open_files(train=train, category=category)
     processed_image_X = None  # Initialisation
     processed_image_Y = None  # Initialisation
 
@@ -152,11 +166,15 @@ def cropped_resized_images(format_crop=3335,resize_params=512,train=True,categor
 
     if len(image_cat) == 0:
         processed_image=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
+
     else:
-        train_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])[:-1]
-        test_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])[-1]
+        train_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])
+        test_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in X_test])
 
-        train_Y=np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])[:-1]
-        test_Y=  np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])[-1]
-
+        train_Y=np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in image_cat])
+        test_Y=  np.array([binary(resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3))) for image in Y_test])
     return train_X,test_X,train_Y, test_Y
+
+
+if __name__=='__main__':
+    open_files(category=1,train=True)
