@@ -81,11 +81,11 @@ def load_model():
 
         return None
 
-def save_fig_Y(fig=None) -> None:
+def save_fig_Y(category=1,fig=None) -> None:
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
-    local_path = f'plot_results/plot_Y.png'
+    local_path = f'plot_results/plot_Y_{category}.png'
 
     plt.imshow(fig, cmap='gray')
     plt.savefig(local_path)

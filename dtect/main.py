@@ -44,7 +44,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         predictions = pred.squeeze().detach().numpy()  # Retirer le tenseur et convertir en numpy
 
         print(f'Predictions shape: {predictions.shape}')
-        save_fig_pred(epoch, image_size, predictions, category)
+        save_fig_pred(epoch=epoch, image_size=image_size,category=category, fig=predictions)
 
         # Check early stopping
         early_stopping(loss.item())
@@ -54,7 +54,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
 
         if (epoch + 1) % 100 == 0:
             save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
-    save_fig_Y(fig=test_Y)
+    save_fig_Y(fig=test_Y, category=category)
     save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
 
     print("Model training complete")
@@ -70,4 +70,4 @@ def main(category=1, image_size=128, lr=0.01, epochs=250):
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(7, 256, epochs=700)
+    main(7, 256, epochs=900)
