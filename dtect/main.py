@@ -16,7 +16,9 @@ import matplotlib.pyplot as plt
 
 def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, category=1, train=True):
     train_X,test_X,train_Y, test_Y = data_augmentation(train=train, category=category, resize_params=image_size)
-
+    print(len(test_X))
+    print(len(train_X))
+    print(len(test_Y))
     early_stopping = EarlyStopping(patience=10, verbose=True)
 
     for epoch in range(num_epochs):
@@ -42,7 +44,7 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
         predictions = pred.squeeze().detach().numpy()  # Retirer le tenseur et convertir en numpy
 
         print(f'Predictions shape: {predictions.shape}')
-        save_fig_pred(epoch, image_size, predictions)
+        save_fig_pred(epoch, image_size, predictions, category)
 
         # Check early stopping
         early_stopping(loss.item())
@@ -68,4 +70,4 @@ def main(category=1, image_size=128, lr=0.01, epochs=250):
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(8, 256, epochs=500)
+    main(7, 256, epochs=700)
