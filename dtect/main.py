@@ -8,13 +8,13 @@ import torch.optim as optim
 import torch.nn as nn
 import numpy as np
 import pandas as pd
-from dtect.Data_preparation.preprocessing import cropped_resized_images
+from dtect.Data_preparation.preprocessing import data_augmentation
 from dtect.Model.registry import save_model, save_fig_pred, save_fig_Y
 from dtect.Model.model_3 import UNet
 import matplotlib.pyplot as plt
 
 def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, category=1, train=True):
-    train_X,test_X,train_Y, test_Y = cropped_resized_images(train=train, category=category, resize_params=image_size)
+    train_X,test_X,train_Y, test_Y = data_augmentation(train=train, category=category, resize_params=image_size)
 
     for epoch in range(num_epochs):
 

@@ -120,8 +120,8 @@ def binary(rgb_array):
 
     return final_array
 
-def data_augmentation():
-    train_X,test_X,train_Y, test_Y = cropped_resized_images()
+def data_augmentation(format_crop=3335,resize_params=512,train=True,category=1):
+    train_X,test_X,train_Y, test_Y = cropped_resized_images(format_crop=format_crop,resize_params=resize_params,train=train,category=category)
     X_train_aug = []
     X_test_aug = []
     train_Y_aug = []
