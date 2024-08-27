@@ -104,7 +104,7 @@ def save_fig_Y(category=1,fig=None) -> None:
     bucket = client.bucket("data-transfo")
 
     # Créer un blob pour le fichier dans le bucket
-    blob = bucket.blob(f"data-results/plot_results/plot_Y_{timestamp}.png")
+    blob = bucket.blob(f"data-results/plot_results/plot_Y_{timestamp}_{category}.png")
 
     # Télécharger le fichier local vers GCS
     blob.upload_from_filename(local_path)

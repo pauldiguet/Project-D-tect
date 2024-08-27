@@ -52,8 +52,9 @@ def train_model(model, optimizer, criterion, num_epochs=10, image_size=128, cate
 
         if (epoch + 1) % 100 == 0:
             save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
+    save_model(model.eval())
     save_fig_Y(fig=test_Y, category=category)
-    save_model(model.eval())  # Sauvegarder le modèle en mode évaluation
+ # Sauvegarder le modèle en mode évaluation
 
     print("Model training complete")
 
