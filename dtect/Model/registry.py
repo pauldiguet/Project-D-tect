@@ -62,24 +62,32 @@ def save_fig_pred(epoch, image_size, category=1,fig=None) -> None:
 
 
 def load_model():
-    client = storage.Client()
-    bucket = client.bucket("data-transfo")
-    blobs = bucket.blob(f"data-results/*")
 
-    try:
-        latest_blob = max(blobs, key=lambda x: x.updated)
-        latest_model_path_to_save = os.path.join(".", latest_blob.name)
-        latest_blob.download_to_filename(latest_model_path_to_save)
-        model = UNet()
-        model.load_state_dict(torch.load(latest_model_path_to_save))
+    def get_latest_model_blob(bucket_name, prefix):
+        # Initialize the GCS client
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
 
-        print("✅ Latest model downloaded from cloud storage")
+        # List all blobs with the given prefix
+        blobs = list(bucket.list_blobs(prefix=prefix))
 
-        return model
-    except:
-        print(f"\n❌ No model found in GCS bucket {'data-transfo'}")
+        if not blobs:
+            print(f"No blobs found with prefix '{prefix}' in bucket '{bucket_name}'")
+            return None
 
-        return None
+        # Sort blobs by their updated time (creation time if no updates)
+        blobs.sort(key=lambda x: x.updated, reverse=True)
+
+        # Return the latest blob
+        return blobs[0]
+
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+
+    latest_blob = get_latest_model_blob("data-transfo", "data-results/model_results/2024")
+    latest_blob.download_to_filename(f"model_results/model_load{timestamp}.h5")
+    model = torch.load("model_results")
+    return model
+
 
 def save_fig_Y(category=1,fig=None) -> None:
 
@@ -107,3 +115,6 @@ def save_fig_Y(category=1,fig=None) -> None:
     print("✅ Plot of Y saved on GCS")
 
     return None
+
+if __name__ == "__main__":
+    load_model()
