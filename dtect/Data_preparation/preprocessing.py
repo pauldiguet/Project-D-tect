@@ -56,7 +56,7 @@ def open_files(category=1,train=True):
                     if len(cats) == 0:
                         break
                     if "6100_2_2" in filename:
-                        cats.pop(0)
+
                         img_data = blob_img.download_as_bytes()
                         img = Image.open(io.BytesIO(img_data))
                         X_test.append(img)
@@ -102,6 +102,7 @@ def open_files(category=1,train=True):
                         images.append(img)
                         filenames.append(filename)
 
+    print(filenames)
 
     return images_cat,images, X_test, Y_test
 
@@ -168,6 +169,7 @@ def cropped_resized_images(format_crop=3335,resize_params=512,train=True,categor
         processed_image=[resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images]
 
     else:
+        print(len(images))
         train_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in images])
         test_X= np.array([resize(np.array(cropping(X=image,format_crop=format_crop))/255,(resize_params,resize_params,3)) for image in X_test])
 
