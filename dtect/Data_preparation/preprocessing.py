@@ -56,7 +56,6 @@ def open_files(category=1,train=True):
                     if len(cats) == 0:
                         break
                     if "6100_2_2" in filename:
-                        cats.pop(0)
                         img_data = blob_img.download_as_bytes()
                         img = Image.open(io.BytesIO(img_data))
                         X_test.append(img)
