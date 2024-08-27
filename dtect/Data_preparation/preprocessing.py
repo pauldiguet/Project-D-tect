@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from PIL import Image
 import os
 from skimage.transform import resize
@@ -135,19 +134,14 @@ def binary(rgb_array):
 def data_augmentation(format_crop=3335,resize_params=512,train=True,category=1):
     train_X,test_X,train_Y, test_Y = cropped_resized_images(format_crop=format_crop,resize_params=resize_params,train=train,category=category)
     X_train_aug = []
-    X_test_aug = []
     train_Y_aug = []
-    test_Y_aug = []
 
     def rotate_dataset(ds):
         ds_aug = []
         for image in ds:
             for i in range(4):
                 ds_aug.append(np.rot90(image, k=i))
-        print(len(ds_aug))
         ds_array = np.array(ds_aug)
-        print(ds_array)
-        print(ds_array.shape)
         return ds_array
 
 
@@ -157,7 +151,7 @@ def data_augmentation(format_crop=3335,resize_params=512,train=True,category=1):
     test_Y_aug = test_Y.copy()
 
 
-    return X_train_aug, X_test_aug, train_Y_aug, test_Y_aug
+    return X_train_aug, test_X, train_Y_aug, test_Y
 
 def cropped_resized_images(format_crop=3335,resize_params=512,train=True,category=1):
     """

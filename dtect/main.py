@@ -8,7 +8,7 @@ import torch.optim as optim
 import torch.nn as nn
 import numpy as np
 import pandas as pd
-from dtect.Data_preparation.preprocessing import data_augmentation, cropped_resized_images
+from dtect.Data_preparation.preprocessing import data_augmentation
 from dtect.Model.registry import save_model, save_fig_pred, save_fig_Y
 from dtect.Model.model_3 import UNet
 from dtect.Model.early_stopping import EarlyStopping
@@ -65,4 +65,4 @@ def main(category=1, image_size=128, lr=0.01, epochs=250):
     print("All steps completed successfully")
 
 if __name__ == "__main__":
-    main(8, 256, epochs=400)
+    main(8, 256, epochs=500)
