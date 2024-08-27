@@ -131,7 +131,7 @@ def data_augmentation(format_crop=3335,resize_params=512,train=True,category=1):
         ds_aug = []
         for image in ds:
             for i in range(4):
-                ds_aug.append(image.rotate(90*i))
+                ds_aug.append(np.rot90(image, k=i))
         print(len(ds_aug))
         ds_array = np.array(ds_aug)
         print(ds_array.shape)

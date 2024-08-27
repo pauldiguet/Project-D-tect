@@ -8,7 +8,7 @@ import torch.optim as optim
 import torch.nn as nn
 import numpy as np
 import pandas as pd
-from dtect.Data_preparation.preprocessing import data_augmentation
+from dtect.Data_preparation.preprocessing import data_augmentation, cropped_resized_images
 from dtect.Model.registry import save_model, save_fig_pred, save_fig_Y
 from dtect.Model.model_3 import UNet
 import matplotlib.pyplot as plt
